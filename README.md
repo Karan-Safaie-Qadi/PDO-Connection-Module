@@ -176,7 +176,6 @@ if (Database::isConnected()) {
 
 ## نکات امنیتی
 
-- هرگز `.env` را در مخزن گیت قرار ندهید.
 - تمام متدها از Prepared Statements استفاده می‌کنند.
 - تنظیمات امن PDO به‌صورت پیش‌فرض فعال است.
 
@@ -379,7 +378,6 @@ if (Database::isConnected()) {
 
 ## Security Notes
 
-- Never commit `.env` to git.
 - All methods use Prepared Statements.
 - Secure PDO settings are enabled by default.
 
