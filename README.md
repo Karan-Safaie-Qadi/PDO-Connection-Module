@@ -12,19 +12,19 @@
 
 ## ویژگی‌ها
 
-- ✅ اتصال امن با **Prepared Statements** (مقاوم در برابر SQL Injection)
-- ✅ مدیریت متغیرهای محیطی با `.env` (مخفی‌سازی اطلاعات حساس)
-- ✅ الگوی **Singleton** برای جلوگیری از اتصالات اضافی
-- ✅ متدهای کمکی: `select`, `insert`, `update`, `delete`
-- ✅ پشتیبانی از تراکنش‌ها: `beginTransaction`, `commit`, `rollBack`
-- ✅ قابلیت استفاده به‌عنوان کتابخانه‌ی مجزا
-- ✅ مدیریت خطا با `PDOException`
+- اتصال امن با **Prepared Statements** (مقاوم در برابر SQL Injection)
+- مدیریت متغیرهای محیطی با `.env` (مخفی‌سازی اطلاعات حساس)
+- الگوی **Singleton** برای جلوگیری از اتصالات اضافی
+- متدهای کمکی: `select`, `insert`, `update`, `delete`
+- پشتیبانی از تراکنش‌ها: `beginTransaction`, `commit`, `rollBack`
+- قابلیت استفاده به‌عنوان کتابخانه‌ی مجزا در هر پروژه
+- مدیریت خطا با `PDOException`
 
 ---
 
 ## نصب
 
-کافی است از کامپوزر استفاده کنید:
+برای نصب این کتابخانه در پروژه‌ی خود، از کامپوزر استفاده کنید:
 
 ```bash
 composer require karan-safaie-qadi/pdo-module
@@ -36,7 +36,7 @@ composer require karan-safaie-qadi/pdo-module
 
 ### ۱. ایجاد فایل `.env`
 
-یک فایل `.env` در **ریشه‌ی پروژه** (هم‌سطح `vendor/`) ایجاد کنید:
+در ریشه‌ی پروژه، فایل `.env` را با متغیرهای زیر ایجاد کنید:
 
 ```env
 DB_HOST=localhost
@@ -105,7 +105,7 @@ class User extends Model
 {
     protected string $table = 'users';
     protected string $primaryKey = 'id';
-    
+
     // متد اختصاصی
     public static function findByEmail(string $email): ?array
     {
@@ -131,13 +131,17 @@ $user = User::findByEmail('maryam@example.com');
 
 ## تراکنش‌ها
 
+برای عملیات‌های اتمی از تراکنش استفاده کنید:
+
 ```php
 use Database\Database;
 
 try {
     Database::beginTransaction();
+
     Database::insert('orders', ['user_id' => 1, 'total' => 100]);
     Database::update('users', ['balance' => 900], ['id' => 1]);
+
     Database::commit();
     echo "تراکنش موفق";
 } catch (\PDOException $e) {
@@ -150,6 +154,8 @@ try {
 
 ## مدیریت خطاها
 
+تمامی متدها در صورت بروز خطا، استثنای `PDOException` را پرتاب می‌کنند:
+
 ```php
 try {
     $users = Database::select('SELECT * FROM non_existent_table');
@@ -160,7 +166,7 @@ try {
 }
 ```
 
-بررسی وضعیت اتصال:
+برای بررسی وضعیت اتصال:
 
 ```php
 if (Database::isConnected()) {
@@ -172,13 +178,6 @@ if (Database::isConnected()) {
 
 ---
 
-## نکات امنیتی
-
-- تمام متدها از Prepared Statements استفاده می‌کنند.
-- تنظیمات امن PDO به‌صورت پیش‌فرض فعال است.
-
----
-
 ## مجوز
 
 این پروژه تحت مجوز **MIT** منتشر شده است.
@@ -187,6 +186,7 @@ if (Database::isConnected()) {
 
 ## ارتباط با توسعه‌دهنده
 
+- **نویسنده:** Karan Safaie Qadi
 - **گیت‌هاب:** [Karan-Safaie-Qadi/PDO-Connection-Module](https://github.com/Karan-Safaie-Qadi/PDO-Connection-Module)
 - **پکیج در Packagist:** [karan-safaie-qadi/pdo-module](https://packagist.org/packages/karan-safaie-qadi/pdo-module)
 
@@ -212,19 +212,19 @@ This library uses `PDO` and `vlucas/phpdotenv` and supports two usage methods:
 
 ## Features
 
-- ✅ Secure connection with **Prepared Statements** (SQL Injection resistant)
-- ✅ Environment variable management with `.env` (hiding sensitive info)
-- ✅ **Singleton** pattern to prevent multiple connections
-- ✅ Helper methods: `select`, `insert`, `update`, `delete`
-- ✅ Transaction support: `beginTransaction`, `commit`, `rollBack`
-- ✅ Can be used as a standalone library
-- ✅ Error handling with `PDOException`
+- Secure connection with **Prepared Statements** (SQL Injection resistant)
+- Environment variable management with `.env` (hiding sensitive info)
+- **Singleton** pattern to prevent multiple connections
+- Helper methods: `select`, `insert`, `update`, `delete`
+- Transaction support: `beginTransaction`, `commit`, `rollBack`
+- Can be used as a standalone library in any project
+- Error handling with `PDOException`
 
 ---
 
 ## Installation
 
-Use Composer:
+To install this library in your project, run:
 
 ```bash
 composer require karan-safaie-qadi/pdo-module
@@ -236,7 +236,7 @@ composer require karan-safaie-qadi/pdo-module
 
 ### 1. Create `.env` file
 
-Create a `.env` file in the **project root** (same level as `vendor/`):
+In the project root, create a `.env` file with the following variables:
 
 ```env
 DB_HOST=localhost
@@ -247,7 +247,6 @@ DB_PASSWORD=your_password
 DB_CHARSET=utf8mb4
 DB_DRIVER=mysql
 ```
-
 
 ### 2. Set Root Path
 
@@ -306,7 +305,7 @@ class User extends Model
 {
     protected string $table = 'users';
     protected string $primaryKey = 'id';
-    
+
     // Custom method
     public static function findByEmail(string $email): ?array
     {
@@ -332,13 +331,17 @@ $user = User::findByEmail('maryam@example.com');
 
 ## Transactions
 
+For atomic operations, use transactions:
+
 ```php
 use Database\Database;
 
 try {
     Database::beginTransaction();
+
     Database::insert('orders', ['user_id' => 1, 'total' => 100]);
     Database::update('users', ['balance' => 900], ['id' => 1]);
+
     Database::commit();
     echo "Transaction successful";
 } catch (\PDOException $e) {
@@ -350,6 +353,8 @@ try {
 ---
 
 ## Error Handling
+
+All methods throw `PDOException` on error:
 
 ```php
 try {
@@ -373,13 +378,6 @@ if (Database::isConnected()) {
 
 ---
 
-## Security Notes
-
-- All methods use Prepared Statements.
-- Secure PDO settings are enabled by default.
-
----
-
 ## License
 
 This project is released under the **MIT** license.
@@ -388,8 +386,8 @@ This project is released under the **MIT** license.
 
 ## Contact
 
+- **Author:** Karan Safaie Qadi
 - **GitHub:** [Karan-Safaie-Qadi/PDO-Connection-Module](https://github.com/Karan-Safaie-Qadi/PDO-Connection-Module)
 - **Packagist:** [karan-safaie-qadi/pdo-module](https://packagist.org/packages/karan-safaie-qadi/pdo-module)
 
 </div>
-```
