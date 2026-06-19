@@ -48,8 +48,6 @@ DB_CHARSET=utf8mb4
 DB_DRIVER=mysql
 ```
 
-> **نکته امنیتی:** این فایل را به `.gitignore` اضافه کنید.
-
 ### ۲. تنظیم مسیر ریشه
 
 چون کتابخانه در `vendor/` قرار می‌گیرد، مسیر ریشه را یک بار در ابتدای پروژه تنظیم کنید:
@@ -250,7 +248,6 @@ DB_CHARSET=utf8mb4
 DB_DRIVER=mysql
 ```
 
-> **Security note:** Add this file to `.gitignore`.
 
 ### 2. Set Root Path
 
