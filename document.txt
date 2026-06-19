@@ -1,0 +1,352 @@
+============================================================
+        PDO DATABASE CONNECTION MODULE - DOCUMENTATION
+============================================================
+
+===========================[ فارسی ]===========================
+
+معرفی
+-------
+این ماژول یک کتابخانه‌ی مستقل و امن برای اتصال به دیتابیس با استفاده از PDO است.
+با استفاده از این کتابخانه می‌توانید به دو روش زیر از آن استفاده کنید:
+
+1. متدهای استاتیک (مناسب برای کوئری‌های سریع)
+2. ارث‌بری از کلاس Model (مناسب برای پروژه‌های بزرگ و ساختارمند)
+
+ویژگی‌ها
+---------
+✅ اتصال امن با Prepared Statements (مقاوم در برابر SQL Injection)
+✅ مدیریت متغیرهای محیطی با فایل .env (مخفی‌سازی اطلاعات حساس)
+✅ الگوی Singleton برای جلوگیری از اتصالات اضافی
+✅ متدهای کمکی: select, insert, update, delete
+✅ پشتیبانی از تراکنش‌ها: beginTransaction, commit, rollBack
+✅ قابلیت استفاده به‌عنوان کتابخانه‌ی مجزا در هر پروژه
+✅ مدیریت خطا با PDOException
+
+نصب
+-----
+برای نصب این کتابخانه در پروژه‌ی خود، از دستور زیر استفاده کنید:
+
+    composer require karan-safaie-qadi/pdo-module
+
+پیکربندی اولیه
+---------------
+1. ایجاد فایل .env در ریشه‌ی پروژه (هم‌سطح composer.json):
+
+    DB_HOST=localhost
+    DB_PORT=3306
+    DB_NAME=your_database
+    DB_USERNAME=your_username
+    DB_PASSWORD=your_password
+    DB_CHARSET=utf8mb4
+    DB_DRIVER=mysql
+
+    هشدار: این فایل را به .gitignore اضافه کنید تا در مخزن قرار نگیرد.
+
+2. تنظیم مسیر ریشه در ابتدای فایل ورودی پروژه (مثلاً index.php):
+
+    require_once __DIR__ . '/vendor/autoload.php';
+    use Database\Database;
+    Database::setRootPath(__DIR__);
+
+نحوه‌ی استفاده
+---------------
+روش اول: استفاده‌ی مستقیم (استاتیک)
+
+    use Database\Database;
+
+    // دریافت تمام کاربران با سن بالای ۱۸
+    $users = Database::select('SELECT * FROM users WHERE age > ?', [18]);
+
+    // دریافت یک کاربر با ID مشخص
+    $user = Database::selectOne('SELECT * FROM users WHERE id = ?', [1]);
+
+    // درج کاربر جدید
+    $newId = Database::insert('users', [
+        'name' => 'علی رضایی',
+        'email' => 'ali@example.com',
+        'age' => 25
+    ]);
+
+    // بروزرسانی کاربر
+    Database::update('users', ['age' => 26], ['id' => $newId]);
+
+    // حذف کاربر
+    Database::delete('users', ['id' => $newId]);
+
+    // اجرای کوئری دلخواه
+    $result = Database::execute('SELECT * FROM products WHERE status = ?', ['active']);
+
+روش دوم: استفاده از مدل‌ها (ارث‌بری)
+
+ابتدا یک کلاس مدل برای جدول خود ایجاد کنید:
+
+    namespace YourProject\Models;
+    use Models\Model;
+
+    class User extends Model
+    {
+        protected string $table = 'users';
+        protected string $primaryKey = 'id';
+
+        // متدهای اختصاصی
+        public static function findByEmail(string $email): ?array
+        {
+            return self::selectOne('SELECT * FROM users WHERE email = ?', [$email]);
+        }
+    }
+
+سپس از آن استفاده کنید:
+
+    use YourProject\Models\User;
+
+    // دریافت همه‌ی کاربران
+    $allUsers = User::all();
+
+    // پیدا کردن کاربر با ID
+    $user = User::find(1);
+
+    // ایجاد کاربر جدید
+    $newId = User::create([
+        'name' => 'مریم احمدی',
+        'email' => 'maryam@example.com'
+    ]);
+
+    // بروزرسانی کاربر
+    User::updateRecord($newId, ['status' => 'inactive']);
+
+    // حذف کاربر
+    User::deleteRecord($newId);
+
+    // استفاده از متد اختصاصی
+    $user = User::findByEmail('maryam@example.com');
+
+مدیریت تراکنش‌ها
+-----------------
+برای عملیات‌های اتمی از تراکنش استفاده کنید:
+
+    use Database\Database;
+
+    try {
+        Database::beginTransaction();
+
+        Database::insert('orders', ['user_id' => 1, 'total' => 100]);
+        Database::update('users', ['balance' => 900], ['id' => 1]);
+
+        Database::commit();
+        echo "✅ تراکنش با موفقیت انجام شد.";
+    } catch (\PDOException $e) {
+        Database::rollBack();
+        echo "❌ خطا: " . $e->getMessage();
+    }
+
+مدیریت خطاها
+------------
+تمامی متدها در صورت بروز خطا، استثنای PDOException را پرتاب می‌کنند:
+
+    try {
+        $users = Database::select('SELECT * FROM non_existent_table');
+    } catch (\PDOException $e) {
+        echo "خطای دیتابیس: " . $e->getMessage();
+    } catch (\Exception $e) {
+        echo "خطای عمومی: " . $e->getMessage();
+    }
+
+بررسی وضعیت اتصال:
+
+    if (Database::isConnected()) {
+        echo "✅ اتصال برقرار است.";
+    } else {
+        echo "❌ خطا: " . Database::getLastError();
+    }
+
+نکات امنیتی
+------------
+- هرگز فایل .env را در مخزن گیت قرار ندهید.
+- تمام متدها از Prepared Statements استفاده می‌کنند.
+- تنظیمات PDO به‌صورت پیش‌فرض امن است.
+
+مجوز
+-----
+این کتابخانه تحت مجوز MIT منتشر شده است.
+
+ارتباط با توسعه‌دهنده
+----------------------
+- مخزن گیت‌هاب: https://github.com/Karan-Safaie-Qadi/PDO-Connection-Module
+- پکیج در Packagist: https://packagist.org/packages/karan-safaie-qadi/pdo-module
+
+
+===========================[ English ]===========================
+
+Introduction
+------------
+This is a standalone and secure database connection library using PDO.
+It supports two usage methods:
+
+1. Static methods (for quick queries)
+2. Inheritance from Model class (for large and structured projects)
+
+Features
+--------
+✅ Secure connection with Prepared Statements (SQL Injection resistant)
+✅ Environment variable management with .env file (hiding sensitive info)
+✅ Singleton pattern to prevent multiple connections
+✅ Helper methods: select, insert, update, delete
+✅ Transaction support: beginTransaction, commit, rollBack
+✅ Can be used as a standalone library in any project
+✅ Error handling with PDOException
+
+Installation
+------------
+To install this library in your project, run:
+
+    composer require karan-safaie-qadi/pdo-module
+
+Initial Configuration
+---------------------
+1. Create a .env file in the project root (same level as composer.json):
+
+    DB_HOST=localhost
+    DB_PORT=3306
+    DB_NAME=your_database
+    DB_USERNAME=your_username
+    DB_PASSWORD=your_password
+    DB_CHARSET=utf8mb4
+    DB_DRIVER=mysql
+
+    Warning: Add this file to .gitignore to keep it out of the repository.
+
+2. Set the root path at the beginning of your project entry file (e.g., index.php):
+
+    require_once __DIR__ . '/vendor/autoload.php';
+    use Database\Database;
+    Database::setRootPath(__DIR__);
+
+Usage
+-----
+Method 1: Direct (Static) Usage
+
+    use Database\Database;
+
+    // Get all users older than 18
+    $users = Database::select('SELECT * FROM users WHERE age > ?', [18]);
+
+    // Get one user by ID
+    $user = Database::selectOne('SELECT * FROM users WHERE id = ?', [1]);
+
+    // Insert new user
+    $newId = Database::insert('users', [
+        'name' => 'Ali Rezaei',
+        'email' => 'ali@example.com',
+        'age' => 25
+    ]);
+
+    // Update user
+    Database::update('users', ['age' => 26], ['id' => $newId]);
+
+    // Delete user
+    Database::delete('users', ['id' => $newId]);
+
+    // Custom query
+    $result = Database::execute('SELECT * FROM products WHERE status = ?', ['active']);
+
+Method 2: Using Models (Inheritance)
+
+First, create a model class for your table:
+
+    namespace YourProject\Models;
+    use Models\Model;
+
+    class User extends Model
+    {
+        protected string $table = 'users';
+        protected string $primaryKey = 'id';
+
+        // Custom methods
+        public static function findByEmail(string $email): ?array
+        {
+            return self::selectOne('SELECT * FROM users WHERE email = ?', [$email]);
+        }
+    }
+
+Then use it:
+
+    use YourProject\Models\User;
+
+    // Get all users
+    $allUsers = User::all();
+
+    // Find user by ID
+    $user = User::find(1);
+
+    // Create new user
+    $newId = User::create([
+        'name' => 'Maryam Ahmadi',
+        'email' => 'maryam@example.com'
+    ]);
+
+    // Update user
+    User::updateRecord($newId, ['status' => 'inactive']);
+
+    // Delete user
+    User::deleteRecord($newId);
+
+    // Use custom method
+    $user = User::findByEmail('maryam@example.com');
+
+Transaction Management
+----------------------
+For atomic operations, use transactions:
+
+    use Database\Database;
+
+    try {
+        Database::beginTransaction();
+
+        Database::insert('orders', ['user_id' => 1, 'total' => 100]);
+        Database::update('users', ['balance' => 900], ['id' => 1]);
+
+        Database::commit();
+        echo "✅ Transaction successful.";
+    } catch (\PDOException $e) {
+        Database::rollBack();
+        echo "❌ Error: " . $e->getMessage();
+    }
+
+Error Handling
+--------------
+All methods throw PDOException on error:
+
+    try {
+        $users = Database::select('SELECT * FROM non_existent_table');
+    } catch (\PDOException $e) {
+        echo "Database error: " . $e->getMessage();
+    } catch (\Exception $e) {
+        echo "General error: " . $e->getMessage();
+    }
+
+Check connection status:
+
+    if (Database::isConnected()) {
+        echo "✅ Connected.";
+    } else {
+        echo "❌ Error: " . Database::getLastError();
+    }
+
+Security Notes
+--------------
+- Never commit .env file to git.
+- All methods use Prepared Statements.
+- PDO settings are secure by default.
+
+License
+-------
+This library is released under the MIT license.
+
+Contact
+-------
+- GitHub Repository: https://github.com/Karan-Safaie-Qadi/PDO-Connection-Module
+- Packagist Package: https://packagist.org/packages/karan-safaie-qadi/pdo-module
+
+============================================================
+              END OF DOCUMENTATION
+============================================================
