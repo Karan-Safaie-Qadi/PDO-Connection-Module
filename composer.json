@@ -1,0 +1,8 @@
+{
+    "name": "karan-safaie-qadi/pdo-module",
+    "type": "library",
+    "require": {
+        "php": ">=7.4",
+        "vlucas/phpdotenv": "^5.6"
+    }
+}
