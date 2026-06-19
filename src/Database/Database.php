@@ -13,6 +13,9 @@ class Database
     private static bool $isConnected = false;
     private static ?string $lastError = null;
 
+    /** @var string|null مسیر ریشه‌ی پروژه (برای پیدا کردن .env) */
+    private static ?string $rootPath = null;
+
     private static array $defaultPdoOptions = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -20,12 +23,37 @@ class Database
         PDO::ATTR_PERSISTENT => false,
     ];
 
+    /**
+     * تنظیم مسیر ریشه‌ی پروژه (اجباری برای کتابخانه‌های مجزا)
+     * 
+     * @param string $rootPath مسیر کامل ریشه‌ی پروژه (معمولاً __DIR__ در بوت‌استرپ)
+     */
+    public static function setRootPath(string $rootPath): void
+    {
+        self::$rootPath = rtrim($rootPath, '/\\');
+    }
+
     private static function loadEnvironment(): void
     {
         if (!empty(self::$config))
             return;
 
-        $projectRoot = dirname(__DIR__, 2);
+        // تعیین مسیر ریشه
+        if (self::$rootPath !== null) {
+            // حالت کتابخانه‌ی مجزا (مسیر توسط کاربر تنظیم شده)
+            $projectRoot = self::$rootPath;
+        } else {
+            // حالت توسعه‌ی محلی (برای زمانی که خود ماژول مستقل است)
+            $projectRoot = dirname(__DIR__, 2);
+        }
+
+        if (!file_exists($projectRoot . '/.env')) {
+            throw new \RuntimeException(
+                'فایل .env در مسیر ' . $projectRoot . ' پیدا نشد. ' .
+                'لطفاً با متد Database::setRootPath(__DIR__) مسیر ریشه را تنظیم کنید.'
+            );
+        }
+
         $dotenv = Dotenv::createImmutable($projectRoot);
         $dotenv->load();
 

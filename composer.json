@@ -1,5 +1,6 @@
 {
     "name": "karan-safaie-qadi/pdo-module",
+    "description": "Secure PDO database connection module with environment support",
     "type": "library",
     "require": {
         "php": ">=7.4",
@@ -7,8 +8,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Database\\": "src/Database/",
-            "Models\\": "models/"
+            "Database\\": "src/Database/"
         }
     }
 }
