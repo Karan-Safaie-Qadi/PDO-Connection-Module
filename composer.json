@@ -2,13 +2,20 @@
     "name": "karan-safaie-qadi/pdo-module",
     "description": "Secure PDO database connection module with environment support",
     "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/Karan-Safaie-Qadi/PDO-Connection-Module",
+    "support": {
+        "issues": "https://github.com/Karan-Safaie-Qadi/PDO-Connection-Module/issues",
+        "source": "https://github.com/Karan-Safaie-Qadi/PDO-Connection-Module"
+    },
     "require": {
         "php": ">=7.4",
         "vlucas/phpdotenv": "^5.5"
     },
     "autoload": {
         "psr-4": {
-            "Database\\": "src/Database/"
+            "Database\\": "src/Database/",
+            "Models\\": "models/"
         }
     }
 }
